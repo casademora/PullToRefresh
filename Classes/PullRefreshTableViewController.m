@@ -36,23 +36,31 @@
 @implementation PullRefreshTableViewController
 
 @synthesize textPull, textRelease, textLoading, refreshHeaderView, refreshLabel, refreshArrow, refreshSpinner;
+@synthesize tableView = _tableView;
+@synthesize delegate = _delegate;
 
-- (id)initWithStyle:(UITableViewStyle)style {
-    self = [super initWithStyle:style];
-    if (self != nil) {
-        textPull = [[NSString alloc] initWithString:@"Pull down to refresh..."];
-        textRelease = [[NSString alloc] initWithString:@"Release to refresh..."];
-        textLoading = [[NSString alloc] initWithString:@"Loading..."];
-    }
-    return self;
+- (void)dealloc {
+    [refreshHeaderView release];
+    [refreshLabel release];
+    [refreshArrow release];
+    [refreshSpinner release];
+    [textPull release];
+    [textRelease release];
+    [textLoading release];
+    [super dealloc];
 }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
+- (void) awakeFromNib
+{
+    textPull = [[NSString alloc] initWithString:@"Pull down to refresh..."];
+    textRelease = [[NSString alloc] initWithString:@"Release to refresh..."];
+    textLoading = [[NSString alloc] initWithString:@"Loading..."];
+    
     [self addPullToRefreshHeader];
 }
 
-- (void)addPullToRefreshHeader {
+- (void)addPullToRefreshHeader 
+{
     refreshHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0 - REFRESH_HEADER_HEIGHT, 320, REFRESH_HEADER_HEIGHT)];
     refreshHeaderView.backgroundColor = [UIColor clearColor];
 
@@ -60,6 +68,7 @@
     refreshLabel.backgroundColor = [UIColor clearColor];
     refreshLabel.font = [UIFont boldSystemFontOfSize:12.0];
     refreshLabel.textAlignment = UITextAlignmentCenter;
+    refreshLabel.textColor = [UIColor whiteColor];
 
     refreshArrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow.png"]];
     refreshArrow.frame = CGRectMake((REFRESH_HEADER_HEIGHT - 27) / 2,
@@ -148,21 +157,13 @@
     [refreshSpinner stopAnimating];
 }
 
-- (void)refresh {
-    // This is just a demo. Override this method with your custom reload action.
-    // Don't forget to call stopLoading at the end.
+- (void)refresh 
+{
     [self performSelector:@selector(stopLoading) withObject:nil afterDelay:2.0];
-}
-
-- (void)dealloc {
-    [refreshHeaderView release];
-    [refreshLabel release];
-    [refreshArrow release];
-    [refreshSpinner release];
-    [textPull release];
-    [textRelease release];
-    [textLoading release];
-    [super dealloc];
+    if ([self.delegate respondsToSelector:@selector(refresh)]) 
+    {
+        [self.delegate performSelector:@selector(refresh)];
+    }
 }
 
 @end
