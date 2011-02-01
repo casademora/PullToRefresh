@@ -35,78 +35,97 @@
 
 @implementation PullRefreshTableViewController
 
-@synthesize textPull, textRelease, textLoading, refreshHeaderView, refreshLabel, refreshArrow, refreshSpinner;
+@synthesize textPull = textPull_;
+@synthesize textRelease = textRelease_;
+@synthesize textLoading = textLoading_;
+@synthesize refreshHeaderView = refreshHeaderView_;
+@synthesize refreshLabel = refreshLabel_;
+@synthesize refreshArrow = refreshArrow_;
+@synthesize refreshSpinner = refreshSpinner_;
 @synthesize tableView = _tableView;
 @synthesize delegate = _delegate;
 
-- (void)dealloc {
-    [refreshHeaderView release];
-    [refreshLabel release];
-    [refreshArrow release];
-    [refreshSpinner release];
-    [textPull release];
-    [textRelease release];
-    [textLoading release];
+- (void)dealloc 
+{
+    self.refreshHeaderView = nil;
+    self.refreshLabel = nil;
+    self.refreshArrow = nil;
+    self.refreshSpinner = nil;
+    self.textPull = nil;
+    self.textRelease = nil;
+    self.textLoading = nil;
+    
     [super dealloc];
 }
 
 - (void) awakeFromNib
 {
-    textPull = [[NSString alloc] initWithString:@"Pull down to refresh..."];
-    textRelease = [[NSString alloc] initWithString:@"Release to refresh..."];
-    textLoading = [[NSString alloc] initWithString:@"Loading..."];
+    self.textPull = @"Pull down to refresh...";
+    self.textRelease = @"Release to refresh...";
+    self.textLoading = @"Loading...";
     
     [self addPullToRefreshHeader];
 }
 
 - (void)addPullToRefreshHeader 
 {
-    refreshHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0 - REFRESH_HEADER_HEIGHT, 320, REFRESH_HEADER_HEIGHT)];
-    refreshHeaderView.backgroundColor = [UIColor clearColor];
+    self.refreshHeaderView = [[[UIView alloc] initWithFrame:CGRectMake(0, 0 - REFRESH_HEADER_HEIGHT, 320, REFRESH_HEADER_HEIGHT)] autorelease];
+    self.refreshHeaderView.backgroundColor = [UIColor clearColor];
 
-    refreshLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, REFRESH_HEADER_HEIGHT)];
-    refreshLabel.backgroundColor = [UIColor clearColor];
-    refreshLabel.font = [UIFont boldSystemFontOfSize:12.0];
-    refreshLabel.textAlignment = UITextAlignmentCenter;
-    refreshLabel.textColor = [UIColor whiteColor];
+    self.refreshLabel = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, REFRESH_HEADER_HEIGHT)] autorelease];
+    self.refreshLabel.backgroundColor = [UIColor clearColor];
+    self.refreshLabel.font = [UIFont boldSystemFontOfSize:12.0];
+    self.refreshLabel.textAlignment = UITextAlignmentCenter;
+    self.refreshLabel.textColor = [UIColor colorWithWhite:.1 alpha:1];
 
-    refreshArrow = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow.png"]];
-    refreshArrow.frame = CGRectMake((REFRESH_HEADER_HEIGHT - 27) / 2,
+    self.refreshArrow = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow.png"]] autorelease];
+    self.refreshArrow.frame = CGRectMake((REFRESH_HEADER_HEIGHT - 27) / 2,
                                     (REFRESH_HEADER_HEIGHT - 44) / 2,
                                     27, 44);
 
-    refreshSpinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    refreshSpinner.frame = CGRectMake((REFRESH_HEADER_HEIGHT - 20) / 2, (REFRESH_HEADER_HEIGHT - 20) / 2, 20, 20);
-    refreshSpinner.hidesWhenStopped = YES;
+    self.refreshSpinner = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
+    self.refreshSpinner.frame = CGRectMake((REFRESH_HEADER_HEIGHT - 20) / 2, (REFRESH_HEADER_HEIGHT - 20) / 2, 20, 20);
+    self.refreshSpinner.hidesWhenStopped = YES;
 
-    [refreshHeaderView addSubview:refreshLabel];
-    [refreshHeaderView addSubview:refreshArrow];
-    [refreshHeaderView addSubview:refreshSpinner];
-    [self.tableView addSubview:refreshHeaderView];
+    [self.refreshHeaderView addSubview:self.refreshLabel];
+    [self.refreshHeaderView addSubview:self.refreshArrow];
+    [self.refreshHeaderView addSubview:self.refreshSpinner];
+    [self.tableView addSubview:self.refreshHeaderView];
 }
 
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView 
+{
     if (isLoading) return;
     isDragging = YES;
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    if (isLoading) {
+    if (isLoading) 
+    {
         // Update the content inset, good for section headers
         if (scrollView.contentOffset.y > 0)
+        {   
             self.tableView.contentInset = UIEdgeInsetsZero;
+        }
         else if (scrollView.contentOffset.y >= -REFRESH_HEADER_HEIGHT)
+        {   
             self.tableView.contentInset = UIEdgeInsetsMake(-scrollView.contentOffset.y, 0, 0, 0);
-    } else if (isDragging && scrollView.contentOffset.y < 0) {
+        }
+    } 
+    else if (isDragging && scrollView.contentOffset.y < 0) 
+    {
         // Update the arrow direction and label
         [UIView beginAnimations:nil context:NULL];
-        if (scrollView.contentOffset.y < -REFRESH_HEADER_HEIGHT) {
+        if (scrollView.contentOffset.y < -REFRESH_HEADER_HEIGHT) 
+        {
             // User is scrolling above the header
-            refreshLabel.text = self.textRelease;
-            [refreshArrow layer].transform = CATransform3DMakeRotation(M_PI, 0, 0, 1);
-        } else { // User is scrolling somewhere within the header
-            refreshLabel.text = self.textPull;
-            [refreshArrow layer].transform = CATransform3DMakeRotation(M_PI * 2, 0, 0, 1);
+            self.refreshLabel.text = self.textRelease;
+            [self.refreshArrow layer].transform = CATransform3DMakeRotation(M_PI, 0, 0, 1);
+        } 
+        else
+        { // User is scrolling somewhere within the header
+            self.refreshLabel.text = self.textPull;
+            [self.refreshArrow layer].transform = CATransform3DMakeRotation(M_PI * 2, 0, 0, 1);
         }
         [UIView commitAnimations];
     }
@@ -115,7 +134,8 @@
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
     if (isLoading) return;
     isDragging = NO;
-    if (scrollView.contentOffset.y <= -REFRESH_HEADER_HEIGHT) {
+    if (scrollView.contentOffset.y <= -REFRESH_HEADER_HEIGHT) 
+    {
         // Released above the header
         [self startLoading];
     }
@@ -127,10 +147,12 @@
     // Show the header
     [UIView beginAnimations:nil context:NULL];
     [UIView setAnimationDuration:0.3];
+    
     self.tableView.contentInset = UIEdgeInsetsMake(REFRESH_HEADER_HEIGHT, 0, 0, 0);
-    refreshLabel.text = self.textLoading;
-    refreshArrow.hidden = YES;
-    [refreshSpinner startAnimating];
+    self.refreshLabel.text = self.textLoading;
+    self.refreshArrow.hidden = YES;
+    [self.refreshSpinner startAnimating];
+    
     [UIView commitAnimations];
 
     // Refresh action!
@@ -145,21 +167,22 @@
     [UIView setAnimationDelegate:self];
     [UIView setAnimationDuration:0.3];
     [UIView setAnimationDidStopSelector:@selector(stopLoadingComplete:finished:context:)];
+    
     self.tableView.contentInset = UIEdgeInsetsZero;
-    [refreshArrow layer].transform = CATransform3DMakeRotation(M_PI * 2, 0, 0, 1);
+    [self.refreshArrow layer].transform = CATransform3DMakeRotation(M_PI * 2, 0, 0, 1);
+    
     [UIView commitAnimations];
 }
 
 - (void)stopLoadingComplete:(NSString *)animationID finished:(NSNumber *)finished context:(void *)context {
     // Reset the header
-    refreshLabel.text = self.textPull;
-    refreshArrow.hidden = NO;
-    [refreshSpinner stopAnimating];
+    self.refreshLabel.text = self.textPull;
+    self.refreshArrow.hidden = NO;
+    [self.refreshSpinner stopAnimating];
 }
 
 - (void)refresh 
 {
-    [self performSelector:@selector(stopLoading) withObject:nil afterDelay:2.0];
     if ([self.delegate respondsToSelector:@selector(refresh)]) 
     {
         [self.delegate performSelector:@selector(refresh)];

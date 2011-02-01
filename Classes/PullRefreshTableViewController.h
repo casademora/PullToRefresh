@@ -30,7 +30,7 @@
 #import <UIKit/UIKit.h>
 
 
-@interface PullRefreshTableViewController : NSObject {
+@interface PullRefreshTableViewController : NSObject<UIScrollViewDelegate> {
     BOOL isDragging;
     BOOL isLoading;
 }
