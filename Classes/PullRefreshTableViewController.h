@@ -29,6 +29,8 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol PullToRefreshControllerDelegate;
+
 
 @interface PullRefreshTableViewController : NSObject<UIScrollViewDelegate> {
     BOOL isDragging;
@@ -52,3 +54,10 @@
 - (void)refresh;
 
 @end
+
+@protocol PullToRefreshControllerDelegate <NSObject, UIScrollViewDelegate>
+
+- (void) refresh;
+
+@end
+
